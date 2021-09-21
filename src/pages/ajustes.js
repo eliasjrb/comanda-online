@@ -1,7 +1,12 @@
-export default function Ajustes(){
+import Layout from '../components/template/Layout'
+
+export default function Ajustes() {
     return (
-        <div>
-            <h1>Ajustes</h1>
-        </div>
+        <Layout titulo="Ajustes"  subtitulo="Aqui você está na pagina de Ajustes">
+            <div>
+                <h1>Ajustes conteudo</h1>
+            </div>
+        </Layout>
+
     )
 }
