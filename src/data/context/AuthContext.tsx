@@ -1,11 +1,14 @@
 import route from 'next/router'
-import { createContext, useState } from "react"
+import { createContext, useEffect, useState } from "react"
+import Cookies from 'js-cookie'
 import firebase from "../../firebase/config"
 import Usuario from '../../model/Usuario'
 
 interface AuthContextProps{
     usuario?: Usuario
+    carregando?: boolean
     loginGoogle?: () => Promise<void>
+    logout?: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextProps>({})
@@ -23,24 +26,75 @@ async function usuarioNormalizado(usuarioFirebase: firebase.User): Promise<Usuar
     }
 }
 
+function gerenciarCookie(logado: boolean){
+    if(logado){
+        Cookies.set('comanda-online-auth', logado, {
+            expires:7
+        })
+    }else{
+        Cookies.remove('comanda-online-auth')
+    }
+}
+
 export function AuthProvider(props) {
+    const [carregando, setCarregando] = useState(true)
     const [usuario, setUsuario] = useState<Usuario>(null)
 
-    async function loginGoogle(){
-        const resp = await firebase.auth().signInWithPopup(
-            new firebase.auth.GoogleAuthProvider()
-        )
-        if(resp.user?.email){
-            const usuario = await usuarioNormalizado(resp.user)
+    async function configurarSessao(usuarioFirebase){
+        if(usuarioFirebase?.email){
+            const usuario = await usuarioNormalizado(usuarioFirebase)
             setUsuario(usuario)
-            route.push("/")
+            gerenciarCookie(true)
+            setCarregando(false)
+            return usuario.email
+        }else {
+            setUsuario(null)
+            gerenciarCookie(false)
+            setCarregando(false)
+            return false
         }
     }
+
+    async function loginGoogle(){
+        try{
+            setCarregando(true)
+            const resp = await firebase.auth().signInWithPopup(
+                new firebase.auth.GoogleAuthProvider()
+            )
+
+            configurarSessao(resp.user)
+            route.push("/")
+            
+        }finally{
+            setCarregando(false)
+        }
+    }
+
+    async function logout() {
+        try{
+            setCarregando(true)
+            await firebase.auth().signOut()
+            await configurarSessao(null)
+        }finally{
+            setCarregando(false)
+        }
+    }
+
+    useEffect(() => {
+        if(Cookies.get('comanda-online-auth')){
+            const cancelar = firebase.auth().onIdTokenChanged(configurarSessao)
+            return () => cancelar()
+        }else{
+            setCarregando(false)
+        }
+    }, [])
 
     return (
         <AuthContext.Provider value={{
             usuario,
-            loginGoogle
+            carregando,
+            loginGoogle,
+            logout
         }}>
             {props.children}
         </AuthContext.Provider>
