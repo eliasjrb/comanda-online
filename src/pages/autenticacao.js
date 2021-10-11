@@ -33,13 +33,15 @@ export default function Autenticacao() {
 
     return (
         <div className={`flex h-screen items-center justify-center`}>
-            <div className={`hidden md:block w-1/2 lg:w-2/3`}>
+            {/* <div className={`hidden md:block w-1/2 lg:w-2/3`}> */}
+            <div className={`flex relative w-full `}>
                 <img src="https://source.unsplash.com/random"
                     alt="Imagem da Tela de Autenticação"
                     className={`h-screen w-full object-cover`}
                 />
             </div>
-            <div className={`w-full md:w-1/2 m-10`}>
+            {/* <div className={`w-full md:w-1/2 m-10`}> */}
+            <div className={`absolute md:right-0 p-10 w-full md:w-1/3 rounded m-36 bg-white bg-opacity-50`}>
                 <h1 className={`
                 text-3xl font-bold mb-5
             `}>
