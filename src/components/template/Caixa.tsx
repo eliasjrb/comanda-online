@@ -45,7 +45,7 @@ export default function Caixa() {
                 <tbody>
                     {listarProdutos()}
                     <tr className="bg-gray-500 text-2xl">
-                        <td colSpan="3">Total</td>
+                        <td>Total</td>
                         <td>{valorTotal.toFixed(2)}</td>
                     </tr>
                 </tbody>
